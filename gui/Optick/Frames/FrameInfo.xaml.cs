@@ -45,6 +45,7 @@ namespace Profiler
             {
                 this.frame = frame;
                 this.DataContext = frame;
+                SummaryTable.RefreshSearch();    
             }
             else if (node != null)
             {

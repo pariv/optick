@@ -130,6 +130,10 @@ namespace Profiler
 			}
 		}
 
+		public void RefreshSearch()
+		{
+			UpdateTableFilter(FilterText.Text);
+		}
 		public void RefreshFilter()
 		{
 			HashSet<Object> filter = new HashSet<Object>();
