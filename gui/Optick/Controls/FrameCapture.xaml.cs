@@ -22,6 +22,7 @@ using System.Runtime.CompilerServices;            //CallerMemberName
 using Profiler.ViewModels;
 using Profiler.InfrastructureMvvm;
 using Autofac;
+using NHotkey.Wpf;
 using Profiler.Controls.ViewModels;
 
 namespace Profiler.Controls
@@ -89,6 +90,7 @@ namespace Profiler.Controls
 
 			EventThreadViewControl.Settings = Settings.LocalSettings.Data.ThreadSettings;
 			Settings.LocalSettings.OnChanged += LocalSettings_OnChanged;
+
 		}
 
 		private void LocalSettings_OnChanged()
@@ -248,9 +250,11 @@ namespace Profiler.Controls
 			ProfilerClient.Get().SendMessage(new TurnSamplingMessage(-1, false));
 		}
 
+        private bool isCaptureStarted = false;
 		private void StartButton_Unchecked(object sender, System.Windows.RoutedEventArgs e)
 		{
-			Task.Run(() => ProfilerClient.Get().SendMessage(new StopMessage()));
+			timeLine.StopCapture();
+			isCaptureStarted = false;
 		}
 
 		private void StartButton_Checked(object sender, System.Windows.RoutedEventArgs e)
@@ -266,6 +270,36 @@ namespace Profiler.Controls
 
 			CaptureSettings settings = CaptureSettingsVM.GetSettings();
 			timeLine.StartCapture(address, platform.Port, settings, platform.Password);
+			isCaptureStarted = true;
+		}
+
+		private void ToggleCapture()
+		{
+			if (isCaptureStarted)
+			{
+				StopCapture();
+			}
+			else
+			{
+				StartCapture();
+			}
+		}
+
+		private void StartCapture()
+		{
+			if (isCaptureStarted)
+			{
+				return;
+			}
+
+			StartButton_Checked(this, null);
+		}
+		private void StopCapture()
+		{
+			if (isCaptureStarted)
+			{
+				StartButton_Unchecked(this, null);
+			}
 		}
 
 		private void OnOpenCommandExecuted(object sender, ExecutedRoutedEventArgs args)
@@ -300,6 +334,19 @@ namespace Profiler.Controls
 			vm.Update();
 			DebugInfoPopup.DataContext = vm;
 			DebugInfoPopup.IsOpen = true;
+		}
+
+		public void SetHotkeys()
+		{
+			if (HotkeyService.IsToggle)
+			{
+				HotkeyManager.Current.AddOrReplace("Start_capture", HotkeyService.PlayHotkey.Key, HotkeyService.PlayHotkey.Modifiers, (sender, args) => ToggleCapture());
+			}
+			else
+			{
+				HotkeyManager.Current.AddOrReplace("Start_capture", HotkeyService.PlayHotkey.Key, HotkeyService.PlayHotkey.Modifiers, (sender, args) => StartCapture());
+				HotkeyManager.Current.AddOrReplace("Stop_capture", HotkeyService.StopHotkey.Key, HotkeyService.StopHotkey.Modifiers, (sender, args) => StopCapture());
+			}
 		}
 	}
 }

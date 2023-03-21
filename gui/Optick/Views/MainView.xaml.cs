@@ -24,9 +24,11 @@ using Profiler.TaskManager;
 using Profiler.ViewModels;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Linq;
 using MahApps.Metro.Controls.Dialogs;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Windows.Input;
 using Newtonsoft.Json;
 
 namespace Profiler.Views
@@ -97,10 +99,34 @@ namespace Profiler.Views
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
 		{
 			ParseCommandLine();
+			LoadHotkeys();
 			CheckVersionOnGithub();
 		}
 
-		private void ParseCommandLine()
+        private void LoadHotkeys()
+        {
+	        try
+	        {
+		        var content = File.ReadAllText("hotkeys.json");
+		        var hotkeys = JsonConvert.DeserializeObject<List<HotkeyInfo>>(content);
+		        if (hotkeys.Any())
+		        {
+			        HotkeyService.PlayHotkey = hotkeys[0];
+			        if (hotkeys.Count > 1)
+			        {
+				        HotkeyService.StopHotkey = hotkeys[1];
+			        }
+		        }
+
+		        FrameCaptureControl.SetHotkeys();
+	        }
+	        catch (Exception e)
+	        {
+		        Console.WriteLine(e);
+	        }
+        }
+
+        private void ParseCommandLine()
 		{
 			string[] args = Environment.GetCommandLineArgs();
 			for (int i = 1; i < args.Length; ++i)

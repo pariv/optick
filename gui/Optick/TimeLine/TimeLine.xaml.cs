@@ -443,6 +443,11 @@ namespace Profiler
 
 			Task.Run(() => { ProfilerClient.Get().SendMessage(new StartMessage() { Settings = settings, Password = password } , true); });
 		}
+
+		public void StopCapture()
+		{
+			Task.Run(() => ProfilerClient.Get().SendMessage(new StopMessage()));
+		}
 	}
 
 	public class FrameHeightConverter : IValueConverter
