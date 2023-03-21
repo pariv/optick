@@ -341,12 +341,28 @@ namespace Profiler.Controls
 			if (HotkeyService.IsToggle)
 			{
 				HotkeyManager.Current.AddOrReplace("Start_capture", HotkeyService.PlayHotkey.Key, HotkeyService.PlayHotkey.Modifiers, (sender, args) => ToggleCapture());
+				var hotkeyStrings = GetFlags(HotkeyService.PlayHotkey.Modifiers).Select(keys => keys.ToString())
+					.Union(new List<string> { HotkeyService.PlayHotkey.Key.ToString() }).ToArray();
+				StartButton.ToolTip += $" (Toggle: {string.Join(" + ", hotkeyStrings)})";
 			}
 			else
 			{
 				HotkeyManager.Current.AddOrReplace("Start_capture", HotkeyService.PlayHotkey.Key, HotkeyService.PlayHotkey.Modifiers, (sender, args) => StartCapture());
 				HotkeyManager.Current.AddOrReplace("Stop_capture", HotkeyService.StopHotkey.Key, HotkeyService.StopHotkey.Modifiers, (sender, args) => StopCapture());
+				var hotkeyStartStrings = GetFlags(HotkeyService.PlayHotkey.Modifiers).Select(keys => keys.ToString())
+					.Union(new List<string> { HotkeyService.PlayHotkey.Key.ToString() }).ToArray();
+				var hotkeyStopStrings = GetFlags(HotkeyService.StopHotkey.Modifiers).Select(keys => keys.ToString())
+					.Union(new List<string> { HotkeyService.StopHotkey.Key.ToString() }).ToArray();
+				StartButton.ToolTip += $" (Start: {string.Join(" + ", hotkeyStartStrings)}; Stop: {string.Join(" + ", hotkeyStopStrings)})";
 			}
+			
+		}
+		
+		public static T[] GetFlags<T>(T en) where T : struct, Enum
+		{
+			var zero = (T)Convert.ChangeType(0, Enum.GetUnderlyingType(typeof(T)));
+			return Enum.GetValues(typeof(T)).Cast<T>().Where(member => en.HasFlag(member))
+				.Where(enumValue => !Equals(enumValue, zero)).ToArray();
 		}
 	}
 }
