@@ -250,11 +250,9 @@ namespace Profiler.Controls
 			ProfilerClient.Get().SendMessage(new TurnSamplingMessage(-1, false));
 		}
 
-        private bool isCaptureStarted = false;
 		private void StartButton_Unchecked(object sender, System.Windows.RoutedEventArgs e)
 		{
 			timeLine.StopCapture();
-			isCaptureStarted = false;
 		}
 
 		private void StartButton_Checked(object sender, System.Windows.RoutedEventArgs e)
@@ -270,36 +268,21 @@ namespace Profiler.Controls
 
 			CaptureSettings settings = CaptureSettingsVM.GetSettings();
 			timeLine.StartCapture(address, platform.Port, settings, platform.Password);
-			isCaptureStarted = true;
 		}
 
+		private MainViewModel ViewModel => DataContext as MainViewModel;
 		private void ToggleCapture()
 		{
-			if (isCaptureStarted)
-			{
-				StopCapture();
-			}
-			else
-			{
-				StartCapture();
-			}
+			ViewModel.IsCapturing = !ViewModel.IsCapturing;
 		}
 
 		private void StartCapture()
 		{
-			if (isCaptureStarted)
-			{
-				return;
-			}
-
-			StartButton_Checked(this, null);
+			ViewModel.IsCapturing = true;
 		}
 		private void StopCapture()
 		{
-			if (isCaptureStarted)
-			{
-				StartButton_Unchecked(this, null);
-			}
+			ViewModel.IsCapturing = false;
 		}
 
 		private void OnOpenCommandExecuted(object sender, ExecutedRoutedEventArgs args)
